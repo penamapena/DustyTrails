@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://camhlp34034p0"]
+
+[ext_resource type="Script" uid="uid://cl0fw61gj1xvf" path="res://Scripts/Pickup.gd" id="1_cya6u"]
+[ext_resource type="Texture2D" uid="uid://b6wahuhdh6mbg" path="res://Assets/Icons/shard_01i.png" id="2_cya6u"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cya6u"]
+size = Vector2(20, 16)
+
+[node name="Pickup" type="Area2D" unique_id=498499723]
+script = ExtResource("1_cya6u")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=738808682]
+shape = SubResource("RectangleShape2D_cya6u")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=738162979]
+texture = ExtResource("2_cya6u")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
