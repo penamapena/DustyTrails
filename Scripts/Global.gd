@@ -1,7 +1,9 @@
+########## Global.gd
 extends Node
 
 @onready var pickups_scene = preload("res://Scenes/pickup.tscn")
 @onready var enemy_scene = preload("res://Scenes/Enemy.tscn")
+@onready var bullet_scene = preload("res://Scenes/Bullet.tscn")
 
 # Pickups
 enum Pickups { AMMO, STAMINA, HEALTH }

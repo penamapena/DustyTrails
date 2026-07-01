@@ -1,4 +1,4 @@
-### Pickup.gd
+########## Pickup.gd
 @tool
 
 extends Area2D

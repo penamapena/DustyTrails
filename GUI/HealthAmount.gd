@@ -1,4 +1,4 @@
-### HealthAmount.gd
+########## HealthAmount.gd
 extends ColorRect
 
 @onready var value = $Value

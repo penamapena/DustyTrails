@@ -1,3 +1,4 @@
+########## EnemySpawner.gd
 extends Node2D
 
 # Node refs
@@ -38,7 +39,7 @@ func spawn_enemy():
 		# Check if the position is a valid spawn location
 		if is_valid_spawn_location(random_position):
 			var enemy = Global.enemy_scene.instantiate()
-			
+			enemy.death.connect(_on_enemy_death)
 			# Convert grid cell to local pixel coordinates
 			# Note: map_to_local automatically centers the position inside the tile!
 			enemy.position = tilemap.map_to_local(random_position)
@@ -46,6 +47,8 @@ func spawn_enemy():
 			spawned_enemies.add_child(enemy)
 			spawned = true
 			enemy_count += 1
+		else:
+			attempts += 1
 			
 	if attempts == max_attempts and not spawned:
 		print("Warning: Could not find a valid spawn location after ", max_attempts, " attempts.")
@@ -73,3 +76,6 @@ func is_valid_spawn_location(position: Vector2i) -> bool:
 func _on_timer_timeout():
 	if enemy_count < max_enemies:
 		spawn_enemy()
+
+func _on_enemy_death():
+	enemy_count = enemy_count - 1

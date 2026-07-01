@@ -1,4 +1,4 @@
-### StaminaAmount.gd
+########## StaminaAmount.gd
 extends ColorRect
 
 @onready var value = $Value

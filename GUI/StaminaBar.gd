@@ -1,3 +1,4 @@
+########## StaminaBar.gd
 extends ColorRect
 
 # Node refs

@@ -3,13 +3,24 @@ extends CharacterBody2D
 # Node refs
 @onready var player = get_tree().root.get_node("Main/Player")
 @onready var animation_sprite = $AnimatedSprite2D
+@onready var animation_player = $AnimationPlayer
+@onready var timer_node = $Timer
+@onready var ray_cast = $RayCast2D
 
 # Enemy stats
-@export var speed = 50
+@export var speed = 40
 var direction : Vector2 = Vector2.ZERO # Start idle
 var new_direction = Vector2(0,1) 
 var animation
 var is_attacking = false
+var health = 100
+var max_health = 100
+var health_regen = 1
+
+# Bullet & attack variables
+var bullet_damage = 30
+var bullet_reload_time = 1000
+var bullet_fired_time = 0.5
 
 # RandomNumberGenerator to generate timer countdown value 
 var rng = RandomNumberGenerator.new()
@@ -20,7 +31,12 @@ func _ready():
 	# Give the enemy a random starting direction so they aren't frozen
 	pick_random_direction()
 
+func _process(delta: float) -> void:
+	#regenerates our enemy's health
+	health = min(health + health_regen * delta, max_health)
+
 func _physics_process(delta):
+	var movement = speed * direction * delta
 	if not player:
 		return
 
@@ -85,3 +101,31 @@ func returned_direction(look_direction : Vector2):
 		return "up"
 	else:
 		return "down"
+
+func hit(damage):
+	health -= damage
+	if health > 0:
+		#damage
+		animation_player.play("damage")
+	else:
+		timer_node.stop()
+		direction = Vector2.ZERO
+		set_process(false)
+		is_attacking = true
+		animation_sprite.play("death")
+		death.emit()
+		if rng.randf() < 0.9:
+			var pickup = Global.pickups_scene.instantiate()
+			pickup.item = rng.randi() % 3
+			get_tree().root.get_node("Main/PickupSpawner/SpawnedPickups").call_deferred("add_child", pickup)
+			pickup.position = position
+
+func _on_animated_sprite_2d_animation_finished():
+	if animation_sprite.animation == "death":
+		get_tree().queue_delete(self)  
+	is_attacking = false
+# Custom signals
+signal death
+
+func _on_animation_player_animation_finished(anim_name: StringName) -> void:
+	animation_sprite.modulate = Color(1,1,1,1)

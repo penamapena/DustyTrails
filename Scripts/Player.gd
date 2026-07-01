@@ -1,4 +1,4 @@
-### Player.gd
+########## Player.gd
 extends CharacterBody2D
 
 # Node references
@@ -31,6 +31,11 @@ signal stamina_updated
 signal ammo_pickups_updated
 signal health_pickups_updated
 signal stamina_pickups_updated
+
+# Bullet & attack variables
+var bullet_damage = 30
+var bullet_reload_time = 1000
+var bullet_fired_time = 0.5
 
 enum Pickups {AMMO, STAMINA, HEALTH}
 var ammo_pickup = 0
@@ -128,10 +133,22 @@ func returned_direction(direction : Vector2):
 	return default_return
 
 func _input(event):
+	#input event for our attacking, i.e. our shooting
 	if event.is_action_pressed("ui_attack"):
-		is_attacking = true
-		animation = "attack_" + returned_direction(new_direction)
-		animation_sprite.play(animation)
+	#checks the current time as the amount of time passed in milliseconds since the engine started
+		var now = Time.get_ticks_msec()
+		#check if player can shoot if the reload time has passed and we have ammo
+		if now >= bullet_fired_time and ammo_pickup > 0:
+			#shooting anim
+			is_attacking = true
+			var animation  = "attack_" + returned_direction(new_direction)
+			animation_sprite.play(animation)
+			#bullet fired time to current time
+			bullet_fired_time = now + bullet_reload_time
+			#reduce and signal ammo change
+			ammo_pickup = ammo_pickup - 1
+			ammo_pickups_updated.emit(ammo_pickup)
+			
 	elif event.is_action_pressed("ui_consume_health"):
 		if health > 0 && health_pickup > 0:
 			health_pickup = health_pickup - 1
@@ -142,8 +159,18 @@ func _input(event):
 			stamina_pickup = stamina_pickup - 1
 			stamina = min(stamina + 50, max_stamina)
 			stamina_pickups_updated.emit(stamina_pickup)
+
 func _on_animated_sprite_2d_animation_finished() -> void:
 	is_attacking = false
+	
+	# Instantiate Bullet
+	if animation_sprite.animation.begins_with("attack_"):
+		var bullet = Global.bullet_scene.instantiate()
+		bullet.damage = bullet_damage
+		bullet.direction = new_direction.normalized()
+		# Place it 4-5 pixels away in front of the player to simulate it coming from the guns barrel
+		bullet.position = position + new_direction.normalized() * 4
+		get_tree().root.get_node("Main").add_child(bullet)
 
 func add_pickup(item):
 	if item == Global.Pickups.AMMO:
